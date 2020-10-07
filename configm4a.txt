@@ -1,0 +1,14 @@
+# Lines with # are comments
+-ciw
+
+--console-title
+--geo-bypass
+--yes-playlist
+
+# Always extract audio, set audio format to m4a
+-x
+-f bestaudio
+--audio-format m4a
+
+# Do not copy the mtime
+--no-mtime
