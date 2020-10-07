@@ -2,6 +2,7 @@
 Script(s) using Youtube-dl's Windows version
 
 ### Requirements (will be downloaded, if needed)
+- Set Powershell Execution Policy to RemoteSigned (as Administrator, do `Set-ExecutionPolicy RemoteSigned` then confirm)
 - Youtube-dl Windows version (available @ https://youtube-dl.org/downloads/latest/youtube-dl.exe )
 - FFMPEG Windows version (available @ https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip )
 
