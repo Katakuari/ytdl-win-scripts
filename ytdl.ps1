@@ -16,7 +16,7 @@ function ytdl ([string]$fileformat) {
     Write-Host "Chosen file format: $fileformat"
     Write-Host ""
     
-    $config = Get-ChildItem -Path $parentdir -File -Filter *$fileformat*.txt # Search for a txt config with file format in name
+    $config = Get-ChildItem -Path $parentdir -File -Filter "configs\*$fileformat*.txt" # Search for a txt config with file format in name
     if ($null -eq $config) {
         # If no config found, show error and ask if script should continue
         Write-Host "[ ERROR ] No txt config found for chosen format. Please create a txt config for $fileformat." -ForegroundColor Red
@@ -39,7 +39,7 @@ function ytdl ([string]$fileformat) {
     try {
         # Try running FFMPEG from PATH, and if found, use it 
         ffmpeg -hide_banner -loglevel panic
-        & $parentdir\youtube-dl.exe --config-location $parentdir\$config $vidlink
+        & $parentdir\youtube-dl.exe --config-location $parentdir\configs\$config $vidlink
     }
     catch {
         # If FFMPEG not working from PATH, check if FFMPEG\ exists in parent directory
@@ -49,7 +49,7 @@ function ytdl ([string]$fileformat) {
         }
         $ffmpegdir = Get-ChildItem -Path $parentdir -Directory -Filter *ffmpeg*
 
-        & $parentdir\youtube-dl.exe --ffmpeg-location $parentdir\$ffmpegdir\bin --config-location $parentdir\$config $vidlink
+        & $parentdir\youtube-dl.exe --ffmpeg-location $parentdir\$ffmpegdir\bin --config-location $parentdir\configs\$config $vidlink
     }
 
     $again = Read-Host -Prompt "Download another video or playlist? [Y/N]"
