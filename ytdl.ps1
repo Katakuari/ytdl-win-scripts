@@ -20,7 +20,7 @@ function ytdl ([string]$fileformat) {
     if ($null -eq $config) {
         # If no config found, show error and ask if script should continue
         Write-Host "[ ERROR ] No txt config found for chosen format. Please create a txt config for $fileformat." -ForegroundColor Red
-        $continue = Read-Host -Prompt "Continue anyway? [Y/N]"
+        $continue = Read-Host -Prompt "Continue anyway? [Y/N] (Default N)"
         switch ($continue) {
             Y { break }
             N { Exit }
@@ -34,6 +34,17 @@ function ytdl ([string]$fileformat) {
     if ($null -eq (Get-ChildItem -Path $parentdir -File -Filter "youtube-dl.exe")) {
         # Youtube-dl requirement check
         reqCheck("ytdlcheck")
+    } 
+    else {
+        $ytdlu = Read-Host -Prompt "Check for Youtube-dl update? [Y/N] (Default N)"
+        switch ($ytdlu) {
+            Y { 
+                & $parentdir\youtube-dl.exe -U 
+                Start-Sleep -s 1.5
+            }
+            N { break }
+            Default { break }
+        }
     }
 
     try {
@@ -42,7 +53,7 @@ function ytdl ([string]$fileformat) {
         & $parentdir\youtube-dl.exe --config-location $parentdir\configs\$config $vidlink
     }
     catch {
-        # If FFMPEG not working from PATH, check if FFMPEG\ exists in parent directory
+        # If FFMPEG not working from PATH, check if FFMPEG exists in parent directory
         if ($null -eq (Get-ChildItem -Path $parentdir -Directory -Filter *ffmpeg*)) {
             # FFMPEG requirement check
             reqCheck("ffmpegcheck")
@@ -52,7 +63,7 @@ function ytdl ([string]$fileformat) {
         & $parentdir\youtube-dl.exe --ffmpeg-location $parentdir\$ffmpegdir\bin --config-location $parentdir\configs\$config $vidlink
     }
 
-    $again = Read-Host -Prompt "Download another video or playlist? [Y/N]"
+    $again = Read-Host -Prompt "Download another video or playlist? [Y/N] (Default N)"
     switch ($again) {
         Y { ytdl($fileformat) }
         N { break }
@@ -64,7 +75,7 @@ function reqCheck ([string]$req) {
     switch ($req) {
         ytdlcheck {
             Write-Host "[ WARNING ] youtube-dl.exe not found!" -ForegroundColor Yellow
-            $ytdlmiss = Read-Host "Do you wish to download it now? [Y/N]"
+            $ytdlmiss = Read-Host "Do you wish to download it now? [Y/N] (Default N)"
             switch ($ytdlmiss) {
                 Y {
                     try {
@@ -86,7 +97,7 @@ function reqCheck ([string]$req) {
 
         ffmpegcheck {
             Write-Host "[ WARNING ] No FFMPEG folder found!" -ForegroundColor Yellow
-            $ffmpegmiss = Read-Host "Do you wish to download FFMPEG now? [Y/N]"
+            $ffmpegmiss = Read-Host "Do you wish to download FFMPEG now? [Y/N] (Default N)"
             switch ($ffmpegmiss) {
                 Y {
                     try {
@@ -94,7 +105,6 @@ function reqCheck ([string]$req) {
                         Expand-Archive -Path "$parentdir\ffmpeg.zip" -DestinationPath "$parentdir"
                         Remove-Item -Path "$parentdir\ffmpeg.zip" -Force
                         Write-Host "[ INFO ] Done! Continuing..." -ForegroundColor Cyan
-                        Write-Host ""
                         break
                     }                 
                     catch {
@@ -113,15 +123,15 @@ function reqCheck ([string]$req) {
 
 function selection {
     Write-Host "Available download formats: 1 - mp4 (default) | 2 - m4a | 3 - mp3 | 4 - custom"
-    Write-Host "Press Enter to Exit."
-    Write-Host ""
-    $modesel = Read-Host -Prompt "Enter selection"
+    Write-Host "Press Enter to continue with default."
+
+    $modesel = Read-Host -Prompt "Enter number"
     switch ($modesel) {
         1 { ytdl("mp4") }
         2 { ytdl("m4a") }
         3 { ytdl("mp3") }
         4 {
-            Write-Host "[ WARNING ] Please make sure a txt config for the format exists before you continue!" -ForegroundColor Yellow
+            Write-Host "[ INFO ] Please make sure a txt config for the format exists before you continue!" -ForegroundColor Cyan
             $custfileformat = Read-Host -Prompt "Custom file format"
             ytdl("$custfileformat")
         }
