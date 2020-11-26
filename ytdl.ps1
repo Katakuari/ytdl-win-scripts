@@ -1,4 +1,4 @@
-# Last edit: 07.10.2020
+# Created: 22.08.2020
 # Author: Katakuari - https://github.com/Katakuari
 
 New-Variable -Name parentdir -Value (Split-Path $Script:MyInvocation.MyCommand.Path) -Option ReadOnly # Get parent directory of script
