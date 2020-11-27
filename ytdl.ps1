@@ -34,7 +34,7 @@ function ytdl ([string]$fileformat) {
     if ($null -eq (Get-ChildItem -Path $parentdir -File -Filter "youtube-dl.exe")) {
         reqCheck("ytdlcheck")
     } 
-<#     else {
+    <#     else {
         $ytdlu = Read-Host -Prompt "Check for Youtube-dl update? [Y/N] (Default N)"
         switch ($ytdlu) {
             Y { 
@@ -101,17 +101,18 @@ function reqCheck ([string]$req) {
                     try {
                         $WC.DownloadFile($ffmpeglink, "$parentdir\ffmpeg.zip")
                         Expand-Archive -Path "$parentdir\ffmpeg.zip" -DestinationPath "$parentdir"
-                        Remove-Item -Path "$parentdir\ffmpeg.zip" -Force
-                        Remove-Item -Path -Recurse "$parentdir\*ffmpeg*\doc"
-                        Remove-Item -Path -Recurse "$parentdir\*ffmpeg*\presets"
-                        Write-Host "[ INFO ] Done! Continuing..." -ForegroundColor Cyan
-                        break
+                        Start-Sleep -Seconds 1
+                        Write-Host "[ INFO ] Download and extraction successful." -ForegroundColor Cyan
                     }                 
                     catch {
                         Write-Host "[ ERROR ] Could not download or extract file! Check link in script and parent folder!" -ForegroundColor Red
                         Pause
                         Exit
-                    } 
+                    }
+                    Remove-Item -Path "$parentdir\ffmpeg.zip" -Force
+                    Remove-Item -Path "$parentdir\*ffmpeg*\doc" -Recurse
+                    Remove-Item -Path "$parentdir\*ffmpeg*\presets" -Recurse
+                    break
                 }
                 N { Exit }
                 Default { Exit }
