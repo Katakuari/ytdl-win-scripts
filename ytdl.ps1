@@ -9,14 +9,14 @@ New-Variable -Name ffmpeglink -Value "https://www.gyan.dev/ffmpeg/builds/ffmpeg-
 New-Variable -Name ytdllink -Value "https://youtube-dl.org/downloads/latest/youtube-dl.exe" -Option ReadOnly
 
 
-Write-Host "[ INFO ] Please make sure you have your txt configs in the same directory as this script." -ForegroundColor Cyan
+Write-Host "[ INFO ] Please make sure you have your txt configs in the configs directory." -ForegroundColor Cyan
 
 function ytdl ([string]$fileformat) {
     # File format passed from selection
     Write-Host "Chosen file format: $fileformat"
     Write-Host ""
     
-    $config = Get-ChildItem -Path $parentdir -File -Filter "configs\*$fileformat*.txt" # Search for a txt config with file format in name
+    $config = Get-ChildItem -Path $parentdir -File -Filter "configs\*$fileformat*.txt"
     if ($null -eq $config) {
         # If no config found, show error and ask if script should continue
         Write-Host "[ ERROR ] No txt config found for chosen format. Please create a txt config for $fileformat." -ForegroundColor Red
@@ -32,10 +32,9 @@ function ytdl ([string]$fileformat) {
     Set-Location $outdir
 
     if ($null -eq (Get-ChildItem -Path $parentdir -File -Filter "youtube-dl.exe")) {
-        # Youtube-dl requirement check
         reqCheck("ytdlcheck")
     } 
-    else {
+<#     else {
         $ytdlu = Read-Host -Prompt "Check for Youtube-dl update? [Y/N] (Default N)"
         switch ($ytdlu) {
             Y { 
@@ -45,17 +44,16 @@ function ytdl ([string]$fileformat) {
             N { break }
             Default { break }
         }
-    }
+    } #>
 
     try {
-        # Try running FFMPEG from PATH, and if found, use it 
+        # Try running FFMPEG from PATH
         ffmpeg -hide_banner -loglevel panic
         & $parentdir\youtube-dl.exe --config-location $parentdir\configs\$config $vidlink
     }
     catch {
-        # If FFMPEG not working from PATH, check if FFMPEG exists in parent directory
+        # Check if FFMPEG exists in parent directory
         if ($null -eq (Get-ChildItem -Path $parentdir -Directory -Filter *ffmpeg*)) {
-            # FFMPEG requirement check
             reqCheck("ffmpegcheck")
         }
         $ffmpegdir = Get-ChildItem -Path $parentdir -Directory -Filter *ffmpeg*
@@ -63,7 +61,7 @@ function ytdl ([string]$fileformat) {
         & $parentdir\youtube-dl.exe --ffmpeg-location $parentdir\$ffmpegdir\bin --config-location $parentdir\configs\$config $vidlink
     }
 
-    $again = Read-Host -Prompt "Download another video or playlist? [Y/N] (Default N)"
+    $again = Read-Host -Prompt "Download another video or playlist in the same format? [Y/N] (Default N)"
     switch ($again) {
         Y { ytdl($fileformat) }
         N { break }
@@ -80,7 +78,7 @@ function reqCheck ([string]$req) {
                 Y {
                     try {
                         $WC.DownloadFile($ytdllink, "$parentdir\youtube-dl.exe")
-                        Write-Host "[ INFO ] Done! Continuing..." -ForegroundColor Cyan
+                        Write-Host "[ INFO ] Download successful." -ForegroundColor Cyan
                         Write-Host ""
                         break
                     }
@@ -104,6 +102,8 @@ function reqCheck ([string]$req) {
                         $WC.DownloadFile($ffmpeglink, "$parentdir\ffmpeg.zip")
                         Expand-Archive -Path "$parentdir\ffmpeg.zip" -DestinationPath "$parentdir"
                         Remove-Item -Path "$parentdir\ffmpeg.zip" -Force
+                        Remove-Item -Path -Recurse "$parentdir\*ffmpeg*\doc"
+                        Remove-Item -Path -Recurse "$parentdir\*ffmpeg*\presets"
                         Write-Host "[ INFO ] Done! Continuing..." -ForegroundColor Cyan
                         break
                     }                 
