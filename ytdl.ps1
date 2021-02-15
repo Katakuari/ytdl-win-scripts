@@ -34,17 +34,6 @@ function ytdl ([string]$fileformat) {
     if ($null -eq (Get-ChildItem -Path $parentdir -File -Filter "youtube-dl.exe")) {
         reqCheck("ytdlcheck")
     } 
-    <#     else {
-        $ytdlu = Read-Host -Prompt "Check for Youtube-dl update? [Y/N] (Default N)"
-        switch ($ytdlu) {
-            Y { 
-                & $parentdir\youtube-dl.exe -U 
-                Start-Sleep -s 1.5
-            }
-            N { break }
-            Default { break }
-        }
-    } #>
 
     try {
         # Try running FFMPEG from PATH
