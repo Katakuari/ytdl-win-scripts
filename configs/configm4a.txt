@@ -4,6 +4,7 @@
 --console-title
 --geo-bypass
 --yes-playlist
+--newline
 
 # Always extract audio, set audio format to m4a
 -x
