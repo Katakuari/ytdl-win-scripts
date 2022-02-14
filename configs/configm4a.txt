@@ -10,6 +10,3 @@
 -x
 -f bestaudio
 --audio-format m4a
-
-# Do not copy the mtime
---no-mtime
