@@ -1,9 +1,8 @@
-﻿import webbrowser, os, time
+﻿import webbrowser, os, subprocess
 from pathlib import Path
 
 import PySimpleGUI as sg    # python3 -m pip install -U PySimpleGUI
 import yt_dlp               # python3 -m pip install -U yt_dlp
-
 
 ######################################## GLOBAL VARS ########################################
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -11,13 +10,12 @@ ffmpeg = f'{ROOT_DIR}\\ffmpeg\\bin'
 
 yt_dlp.utils.bug_reports_message = lambda: ''
 
-
 def main():
 ######################################## PySimpleGUI ########################################
     sg.theme('Dark Blue 3')
 
     menubar_layout = [
-        ['&Quit', '&Github', '&About']
+        ['&Info',['&Github','&About']]
     ]
 
     leftCol_layout = [
@@ -31,7 +29,8 @@ def main():
             [sg.Radio('Downloads', 2, key='DEST_DOWNLOADS', enable_events=True, default=True)],
             [sg.Radio('Custom destination', 2, key='DEST_CUSTOM', enable_events=True),
             sg.FolderBrowse(button_text='Browse...', key='DEST_CUSTOM_SEL', target='DEST_CUSTOM_CUR', initial_folder="C:/", enable_events=True)],
-            [sg.Text(size=(40, 1), key='DEST_CUSTOM_CUR', relief=sg.RELIEF_SUNKEN)]
+            [sg.Text(size=(40, 1), key='DEST_CUSTOM_CUR', relief=sg.RELIEF_SUNKEN)],
+            [sg.Button('Open destination', key='DEST_OPEN', expand_x=True, enable_events=True)]
         ])]
     ]
 
@@ -59,11 +58,11 @@ def main():
         event, values = window.read(timeout=1000)
 
         # Quit application
-        if event == sg.WIN_CLOSED or event == 'Quit':
+        if event == sg.WIN_CLOSED:
             break
 
         # Menubar
-        if event == 'About': sg.PopupOK('A Python script written by Katakuari.\nGithub: https://github.com/Katakuari', title='About ytdl.py')
+        if event == 'About': sg.PopupOK('A Python script written by Katakuari.', title='About ytdl.py')
         if event == 'Github': webbrowser.open(url="https://github.com/Katakuari/ytdl-win-scripts")
 
 
@@ -115,19 +114,34 @@ def main():
         
         if ((values['DEST_CUSTOM'] is True) and (values['DEST_CUSTOM_SEL'] != '')):
             dldest = values['DEST_CUSTOM_SEL']
-            # TODO: Catch PermissionException
-            os.chdir(dldest)
-            # print(os.getcwd())
+            dldest = os.path.normpath(dldest)
+            try:
+                os.chdir(dldest)
+            except PermissionError:
+                sg.PopupOK('Permission error while opening directory! Please choose a different destination!', no_titlebar=True, background_color='darkred')
+                window['DEST_DOWNLOADS'].update(True)
+                window['DEST_CUSTOM_CUR'].update('')
+                window.read(timeout=100)
+                continue
+            except:
+                sg.PopupOK('Unknown error occured, please try again!', no_titlebar=True, background_color='darkred')
+                window['DEST_DOWNLOADS'].update(True)
+                window['DEST_CUSTOM_CUR'].update('')
+                window.read(timeout=100)
+                continue
 
         if values['DEST_DOWNLOADS'] is True:
             dldest = str(Path.home())+"\Downloads"
             os.chdir(dldest)
 
+        if event == 'DEST_OPEN':
+            FILEBROWSER_PATH = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
+            subprocess.run([FILEBROWSER_PATH, f"{dldest}"])
 
         # Download action
         if event == 'B_DOWNLOAD':
-            if (values['YT_LINK'] == ''): sg.Popup('Please insert link starting with "https://"!', no_titlebar=True, background_color='darkred'); continue
-            if not (values['YT_LINK'].startswith('https://')): sg.Popup('Please insert link starting with "https://"!', no_titlebar=True, background_color='darkred'); continue
+            if (values['YT_LINK'] == ''): sg.PopupOK('Please insert link starting with "https://"!', no_titlebar=True, background_color='darkred'); continue
+            if not (values['YT_LINK'].startswith('https://')): sg.PopupOK('Please insert link starting with "https://"!', no_titlebar=True, background_color='darkred'); continue
 
             window['STATUS'].update('Downloading...')
             window['B_DOWNLOAD'].update(disabled=True)
@@ -140,7 +154,6 @@ def main():
             window['STATUS'].update('Download finished!')
 
 
-        #print(ydl_opts)
         #print(event, values)
 
     window.close()
