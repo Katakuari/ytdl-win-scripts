@@ -131,7 +131,7 @@ def main():
 
             window['STATUS'].update('Downloading...')
             window['B_DOWNLOAD'].update(disabled=True)
-            time.sleep(1)
+            window.read(timeout=100)
 
             with yt_dlp.YoutubeDL(ydl_opts, 'no_verbose_header') as ydl:
                 ydl.download(f"{values['YT_LINK']}")
