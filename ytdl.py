@@ -1,4 +1,4 @@
-﻿import webbrowser, os, subprocess
+import webbrowser, os, subprocess
 from pathlib import Path
 
 import PySimpleGUI as sg    # python3 -m pip install -U PySimpleGUI
@@ -15,7 +15,7 @@ def main():
     sg.theme('Dark Blue 3')
 
     menubar_layout = [
-        ['&Info',['&Github','&About']]
+        ['&Info',['&About this script','&YT-DLP on Github','&PySimpleGUI']]
     ]
 
     leftCol_layout = [
@@ -25,6 +25,7 @@ def main():
             [sg.Radio('MP3 (Audio)', 1, key='FORMAT_MP3', enable_events=True)],
             [sg.Checkbox('Keep files after processing', key='CB_KEEP', enable_events=True, default=False)]
         ])],
+
         [sg.Frame('Download destination', [
             [sg.Radio('Downloads', 2, key='DEST_DOWNLOADS', enable_events=True, default=True)],
             [sg.Radio('Custom destination', 2, key='DEST_CUSTOM', enable_events=True),
@@ -38,7 +39,7 @@ def main():
         [sg.Text('Youtube link:'), sg.Input(key='YT_LINK')],
         [sg.Button('Download', key='B_DOWNLOAD', expand_x=True, enable_events=True, disabled=False)],
         [sg.Frame('Status', [
-            [sg.Text(text='Click "Download" to start downloading', key='STATUS', enable_events=True, auto_size_text=True, relief=sg.RELIEF_FLAT, justification='center', expand_x=True, expand_y=True)]
+            [sg.Text(text='Click "Download" to start downloading', key='STATUS', enable_events=False, auto_size_text=True, relief=sg.RELIEF_FLAT, justification='center', expand_x=True, expand_y=True)]
         ], expand_x=True, expand_y=True)]
     ]
 
@@ -61,9 +62,13 @@ def main():
         if event == sg.WIN_CLOSED:
             break
 
+        # Print events and values to console
+        #if (event) and (event != "__TIMEOUT__") and (event != "WinEvent"): print(event, values)
+
         # Menubar
-        if event == 'About': sg.PopupOK('A Python script written by Katakuari.', title='About ytdl.py')
-        if event == 'Github': webbrowser.open(url="https://github.com/Katakuari/ytdl-win-scripts")
+        if event == 'About this script': webbrowser.open(url="https://github.com/Katakuari/ytdl-win-scripts/blob/main/AboutPy.md")
+        if event == 'YT-DLP on Github': webbrowser.open(url="https://github.com/yt-dlp/yt-dlp")
+        if event == 'PySimpleGUI': webbrowser.open(url="https://pysimplegui.readthedocs.io/en/latest/")
 
 
         # Left column: Format button functions
@@ -74,8 +79,7 @@ def main():
                 'source_address': '0.0.0.0',
                 'ffmpeg_location': f'{ffmpeg}',
                 'newline': True,
-                'keepvideo': False,
-                #'logger': Logger,
+                'keepvideo': False
             }
 
         if values['FORMAT_M4A'] is True:
@@ -85,8 +89,7 @@ def main():
                 'source_address': '0.0.0.0',
                 'ffmpeg_location': f'{ffmpeg}',
                 'newline': True,
-                'keepvideo': False,
-                #'logger': Logger,
+                'keepvideo': False
             }
 
         if values['FORMAT_MP3'] is True:
@@ -97,7 +100,6 @@ def main():
                 'ffmpeg_location': f'{ffmpeg}',
                 'newline': True,
                 'keepvideo': False,
-                #'logger': LOGGER,
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
