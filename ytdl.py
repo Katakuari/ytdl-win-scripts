@@ -1,4 +1,4 @@
-import webbrowser, os, subprocess
+﻿import webbrowser, os, subprocess
 from pathlib import Path
 
 import PySimpleGUI as sg    # python3 -m pip install -U PySimpleGUI
@@ -6,7 +6,7 @@ import yt_dlp               # python3 -m pip install -U yt_dlp
 
 ######################################## GLOBAL VARS ########################################
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-ffmpeg = f'{ROOT_DIR}\\ffmpeg\\bin'
+ffmpeg = f'{ROOT_DIR}/ffmpeg/bin'
 
 yt_dlp.utils.bug_reports_message = lambda: ''
 
@@ -63,7 +63,7 @@ def main():
             break
 
         # Print events and values to console
-        #if (event) and (event != "__TIMEOUT__") and (event != "WinEvent"): print(event, values)
+        if (event) and (event != "__TIMEOUT__") and (event != "WinEvent"): print(event, values)
 
         # Menubar
         if event == 'About this script': webbrowser.open(url="https://github.com/Katakuari/ytdl-win-scripts/blob/main/AboutPy.md")
@@ -113,32 +113,23 @@ def main():
         # Left column: Destination button functions
         # Set Radio to custom destination upon choosing folder
         if ((event == 'WinEvent') and (values['DEST_CUSTOM_SEL'] != '') and (values['DEST_CUSTOM'] is False)): window['DEST_CUSTOM'].update(value=True)
-        
+
         if ((values['DEST_CUSTOM'] is True) and (values['DEST_CUSTOM_SEL'] != '')):
             dldest = values['DEST_CUSTOM_SEL']
             dldest = os.path.normpath(dldest)
-            try:
-                os.chdir(dldest)
-            except PermissionError:
-                sg.PopupOK('Permission error while opening directory! Please choose a different destination!', no_titlebar=True, background_color='darkred')
-                window['DEST_DOWNLOADS'].update(True)
-                window['DEST_CUSTOM_CUR'].update('')
-                window.read(timeout=100)
-                continue
-            except:
-                sg.PopupOK('Unknown error occured, please try again!', no_titlebar=True, background_color='darkred')
-                window['DEST_DOWNLOADS'].update(True)
-                window['DEST_CUSTOM_CUR'].update('')
-                window.read(timeout=100)
-                continue
+            os.chdir(dldest)
+            values['DEST_CUSTOM_SEL'] = ''
+
 
         if values['DEST_DOWNLOADS'] is True:
             dldest = str(Path.home())+"\Downloads"
             os.chdir(dldest)
 
+
         if event == 'DEST_OPEN':
             FILEBROWSER_PATH = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
             subprocess.run([FILEBROWSER_PATH, f"{dldest}"])
+
 
         # Download action
         if event == 'B_DOWNLOAD':
@@ -150,7 +141,15 @@ def main():
             window.read(timeout=100)
 
             with yt_dlp.YoutubeDL(ydl_opts, 'no_verbose_header') as ydl:
-                ydl.download(f"{values['YT_LINK']}")
+                try:
+                    print('\n\n')
+                    ydl.download(f"{values['YT_LINK']}")
+                except yt_dlp.DownloadError as e:
+                    sg.PopupOK(f'Error while downloading!\n\n{e.msg}\n\n{e.exc_info}', no_titlebar=True ,background_color='darkred')
+                except yt_dlp.SameFileError as e:
+                    sg.PopupOK(f'Downloaded file already exists!\n\n{e.msg}', no_titlebar=True ,background_color='darkred')
+                except Exception as e:
+                    sg.PopupOK(f'Following error occured:\n\n{e}', no_titlebar=True ,background_color='darkred')
             
             window['B_DOWNLOAD'].update(disabled=False)
             window['STATUS'].update('Download finished!')
