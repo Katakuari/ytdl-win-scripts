@@ -9,12 +9,13 @@ A Powershell/Python script using YT-DLP to download video or audio files.
 
 The Powershell script will recognize missing required files and ask you to download them.
 
-The folder structure for the Powershell version should look something like this:
+The folder structure for both the Powershell and Python version should look something like this:
 ```
 <ytdl-win-scripts root>
 configs\<configs>.txt
-*ffmpeg*\bin\<exe-files>
+ffmpeg\bin\<exe-files>
 yt-dlp.exe
 ytdl.ps1
+ytdl.py
 ```
 
