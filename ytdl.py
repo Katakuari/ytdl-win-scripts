@@ -63,7 +63,7 @@ def main():
             break
 
         # Print events and values to console
-        if (event) and (event != "__TIMEOUT__") and (event != "WinEvent"): print(event, values)
+        if event and event != "__TIMEOUT__" and event != "WinEvent": print(event, values)
 
         # Menubar
         if event == 'About this script': webbrowser.open(url="https://github.com/Katakuari/ytdl-win-scripts/blob/main/AboutPy.md")
@@ -112,9 +112,9 @@ def main():
 
         # Left column: Destination button functions
         # Set Radio to custom destination upon choosing folder
-        if ((event == 'WinEvent') and (values['DEST_CUSTOM_SEL'] != '') and (values['DEST_CUSTOM'] is False)): window['DEST_CUSTOM'].update(value=True)
+        if (event == 'WinEvent' and values['DEST_CUSTOM_SEL'] != '' and values['DEST_CUSTOM'] is False): window['DEST_CUSTOM'].update(value=True)
 
-        if ((values['DEST_CUSTOM'] is True) and (values['DEST_CUSTOM_SEL'] != '')):
+        if values['DEST_CUSTOM'] is True and values['DEST_CUSTOM_SEL'] != '':
             dldest = values['DEST_CUSTOM_SEL']
             dldest = os.path.normpath(dldest)
             os.chdir(dldest)
