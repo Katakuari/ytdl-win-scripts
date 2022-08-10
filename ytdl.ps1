@@ -15,12 +15,12 @@ function ytdl ([string]$fileformat) {
 		Exit
 	}
 
-	$ffmpegdir = Get-ChildItem -Path $PSScriptRoot -Directory -Filter *ffmpeg*
+	$ffmpegdir = (Get-ChildItem -Path "$PSScriptRoot\ffmpeg" -File -Recurse -Filter "ffmpeg.exe").FullName | Split-Path -Parent
 	$vidlink = Read-Host -Prompt "Video or playlist link"
 	Set-Location $outdir
 
 	# Start YTDL with found ffmpeg and chosen config; to keep downloaded files add -k
-	& $PSScriptRoot\yt-dlp.exe --ffmpeg-location $PSScriptRoot\$ffmpegdir\bin --config-location $PSScriptRoot\configs\$config $vidlink
+	& $PSScriptRoot\yt-dlp.exe --ffmpeg-location $ffmpegdir --config-location $PSScriptRoot\configs\$config $vidlink
 
 	$diff = [ChoiceDescription]::new("&Different format")
 	$choices = [ChoiceDescription[]]("&Yes", "&No", $diff)
