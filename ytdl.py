@@ -6,7 +6,7 @@ import yt_dlp               # python3 -m pip install -U yt_dlp
 
 ######################################## GLOBAL VARS ########################################
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-ffmpeg = f'{ROOT_DIR}/ffmpeg/bin'
+ffmpeg = f'{ROOT_DIR}/ffmpeg'
 
 yt_dlp.utils.bug_reports_message = lambda: ''
 
