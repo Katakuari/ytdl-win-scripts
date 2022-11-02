@@ -12,13 +12,6 @@ If it doesn't, you might have to set it yourself like this: Open Powershell as A
 - The Python script was written with Python 3.10.2, but may be compatible with 3.7+ (not tested).
 
 
-The folder structure for both the Powershell and Python version should look something like this:
-```
-<ytdl-win-scripts root>
-    configs\<configs>.txt
-    ffmpeg\bin\<exe-files>
-    yt-dlp.exe
-    ytdl.ps1
-    ytdl.py
-```
+The folder for both the Powershell and Python version should look something like this:
 
+![FolderStructure](https://user-images.githubusercontent.com/24562538/199476196-61596571-15e6-45d4-a759-abf921d456a1.png)
