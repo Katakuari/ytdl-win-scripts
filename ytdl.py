@@ -1,4 +1,9 @@
-﻿import webbrowser, os, subprocess
+﻿# Author: Katakuari - https://github.com/Katakuari
+#
+# FFmpeg essentials build by GyanD on GitHub, available @ https://www.gyan.dev/ffmpeg/builds/, licensed under GPLv3 - https://www.gnu.org/licenses/gpl-3.0.html
+# YT-DLP, available @ https://github.com/yt-dlp/yt-dlp, licensed under Unlicense - https://unlicense.org/
+
+import webbrowser, os, subprocess
 from pathlib import Path
 
 import PySimpleGUI as sg    # python3 -m pip install -U PySimpleGUI
