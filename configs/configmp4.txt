@@ -3,6 +3,6 @@
 
 --console-title
 --geo-bypass
---newline
+--progress
 
--f (bestvideo[height=1080][fps>30][ext=mp4]+bestaudio[ext=m4a])/(bestvideo[height=1080][ext=mp4]+bestaudio[ext=m4a])/(bestvideo[height=1080][ext=mp4]+bestaudio[ext=m4a])/(bestvideo[height=720][fps>30][ext=mp4]+bestaudio[ext=m4a])/bestvideo[ext=mp4]+bestaudio[ext=m4a]/(bestvideo[ext=mp4]+bestaudio[ext=m4a])/best[ext=mp4]
+-f bestvideo[ext=mp4]+bestaudio
