@@ -4,7 +4,7 @@
 --console-title
 --geo-bypass
 --yes-playlist
---newline
+--progress
 
 # Always extract audio, set audio format to mp3
 -x
