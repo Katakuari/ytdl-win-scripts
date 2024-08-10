@@ -7,24 +7,42 @@ yt-dlp, available @ https://github.com/yt-dlp/yt-dlp
 #>
 using namespace System.Management.Automation.Host
 
-New-Variable -Name outdir -Value "$HOME\Downloads" -Option ReadOnly # Destination for video download
+##################### VARS #####################
+New-Variable -Name outputDir -Value "$HOME\Downloads" -Option ReadOnly # Destination for video download
+New-Variable -Name scriptDir -Value "$PSScriptRoot" -Option ReadOnly
 
-function ytdl ([string]$fileformat) {
-	Clear-Host
+$ytdlpURI = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+$ffmpegURI = "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
 
-	# File format passed from selection
-	Write-Host "Currently chosen format: $fileformat`n"
 
-	# Get config file for chosen format
-	$config = (Get-ChildItem -Path "$PSScriptRoot\configs" -File -Filter "*$fileformat*.txt").FullName
-	if ($null -eq $config) {
-		Write-Host "[ ERROR ] No txt config found for chosen format. Please create a txt config for $fileformat." -ForegroundColor Red
-		Pause
-		Exit
+##################### CONF #####################
+$conf_Default = @(
+	"--console-title", "--geo-bypass", "--progress", "--yes-playlist", "-ciw",
+	"--ffmpeg-location", "$ffmpegDir",
+	"-P", $outputDir
+
+	if ($null -ne $browser) {
+		"--cookies-from-browser", $browser
 	}
 
-	# Set ffmpeg path to found exec
-	$ffmpegdir = (Get-ChildItem -Path "$PSScriptRoot\ffmpeg" -File -Recurse -Filter "ffmpeg.exe").FullName | Split-Path -Parent
+)
+
+$conf_mp4 = @("-f", "bestvideo[ext=mp4]+bestaudio")
+$conf_m4a = @("-x", "-f", "bestaudio", "--audio-format", "m4a")
+$conf_mp3 = @("-x", "-f", "bestaudio", "--audio-format", "mp3")
+
+
+##################### FUNC #####################
+function ytdl {
+	param(
+		[Parameter(Mandatory = $true)]
+		[string[]]$fileFormat,
+		[Parameter(Mandatory = $true)]
+		[string]$fileExtension
+	)
+
+	Clear-Host
+	Write-Host "Currently chosen format: $fileExtension`n"
 
 	# Request link from the user
 	$vidlink = Read-Host -Prompt "[D] - Change format`n[Enter] - Exit`n`nVideo or playlist link"
@@ -41,17 +59,9 @@ function ytdl ([string]$fileformat) {
 		Exit
 	}
 
-	$argList = @(
-		"--ffmpeg-location", $ffmpegdir,
-		"--config-location", $config,
-		$vidlink
-		if ($null -ne $browser) {
-			"--cookies-from-browser", $browser
-		}
-	)
 	
 	# Start YTDL with found ffmpeg and chosen config; to keep downloaded files add -k
-	& "$PSScriptRoot\yt-dlp.exe" $argList
+	& "$scriptDir\yt-dlp.exe" $conf_Default $fileFormat $vidlink
 	Start-Sleep 3
 
 	Clear-Variable -Name vidlink -Force
@@ -128,9 +138,9 @@ function selection {
 	$result = $host.ui.PromptForChoice($title, $null, $formats, 0)
 
 	switch ($result) {
-		0 { ytdl("mp4") }
-		1 { ytdl("m4a") }
-		2 { ytdl("mp3") }
+		0 { ytdl -fileFormat $conf_mp4 -fileExtension "MP4" }
+		1 { ytdl -fileFormat $conf_m4a -fileExtension "M4A" }
+		2 { ytdl -fileFormat $conf_mp3 -fileExtension "MP3" }
 		3 {
 			Write-Host "Please state the browser where the cookies/login should be taken from.`nCurrently supported browsers are:`nbrave / chrome / chromium / edge / firefox / opera / safari / vivaldi / whale"
 			$script:browser = Read-Host "Browser"
