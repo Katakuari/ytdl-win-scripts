@@ -15,34 +15,41 @@ $ytdlpURI = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.ex
 $ffmpegURI = "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
 
 
-##################### CONF #####################
-$conf_Default = @(
-	"--console-title", "--geo-bypass", "--progress", "--yes-playlist", "-ciw",
-	"--ffmpeg-location", "$ffmpegDir",
-	"-P", $outputDir
-
-	if ($null -ne $browser) {
-		"--cookies-from-browser", $browser
-	}
-
-)
-
-$conf_mp4 = @("-f", "bestvideo[ext=mp4]+bestaudio")
-$conf_m4a = @("-x", "-f", "bestaudio", "--audio-format", "m4a")
-$conf_mp3 = @("-x", "-f", "bestaudio", "--audio-format", "mp3")
-
-
 ##################### FUNC #####################
 function ytdl {
 	param(
 		[Parameter(Mandatory = $true)]
-		[string[]]$fileFormat,
-		[Parameter(Mandatory = $true)]
-		[string]$fileExtension
+		[string[]]$fileFormat
 	)
 
+	##################### CONF #####################
+	$conf_Default = @(
+		"--ffmpeg-location", $ffmpegDir,
+		"-P", $outputDir
+		"--console-title", "--geo-bypass",
+		"--progress", "--yes-playlist",
+		"-ciw"
+
+		if ($null -ne $browser) {
+			"--cookies-from-browser", $browser
+		}
+
+		if ($fileFormat -eq "mp4") {
+			"-f", "bestvideo[ext=mp4]+bestaudio"
+		}
+
+		if ($fileFormat -eq "m4a") {
+			"-x", "-f", "bestaudio", "--audio-format", "m4a"
+		}
+
+		if ($fileFormat -eq "mp3") {
+			"-x", "-f", "bestaudio", "--audio-format", "mp3"
+		}
+	)
+	################### CONF END ###################
+
 	Clear-Host
-	Write-Host "Currently chosen format: $fileExtension`n"
+	Write-Host "Currently chosen format: $fileFormat`n"
 
 	# Request link from the user
 	$vidlink = Read-Host -Prompt "[D] - Change format`n[Enter] - Exit`n`nVideo or playlist link"
@@ -57,7 +64,7 @@ function ytdl {
 
 
 	# Start YTDL with found ffmpeg and chosen config; to keep downloaded files add -k
-	& "$scriptDir\yt-dlp.exe" $conf_Default $fileFormat $vidlink
+	& "$PSScriptRoot\yt-dlp.exe" $conf_Default $vidlink
 	Start-Sleep 3
 
 	Clear-Variable -Name vidlink -Force
@@ -135,9 +142,9 @@ function selection {
 	$result = $host.ui.PromptForChoice($title, $null, $formats, 0)
 
 	switch ($result) {
-		0 { ytdl -fileFormat $conf_mp4 -fileExtension "MP4" }
-		1 { ytdl -fileFormat $conf_m4a -fileExtension "M4A" }
-		2 { ytdl -fileFormat $conf_mp3 -fileExtension "MP3" }
+		0 { ytdl -fileFormat "MP4" }
+		1 { ytdl -fileFormat "M4A" }
+		2 { ytdl -fileFormat "MP3" }
 		3 {
 			Write-Host "Please state the browser where the cookies/login should be taken from.`nCurrently supported browsers are:`nbrave / chrome / chromium / edge / firefox / opera / safari / vivaldi / whale"
 			$script:browser = Read-Host "Browser"
@@ -154,6 +161,7 @@ function selection {
 }
 
 
+##################### EXEC #####################
 reqCheck
 selection
 
