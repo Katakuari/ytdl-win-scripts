@@ -9,7 +9,7 @@ using namespace System.Management.Automation.Host
 
 ##################### VARS #####################
 New-Variable -Name outputDir -Value "$HOME\Downloads" -Option ReadOnly # Destination for video download
-New-Variable -Name scriptDir -Value "$PSScriptRoot" -Option ReadOnly
+$ffmpegDir = ((Get-ChildItem -Path "$PSScriptRoot" -File -Recurse -Filter "ffmpeg.exe").DirectoryName)
 
 $ytdlpURI = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
 $ffmpegURI = "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
@@ -75,30 +75,35 @@ function ytdl {
 
 
 function reqCheck {
-	if (($null -eq (Get-ChildItem -Path "$scriptDir" -File -Filter "yt-dlp.exe")) -or ($null -eq (Get-ChildItem -Path "$scriptDir" -Recurse -File -Filter "ff*.exe"))) {
-		Write-Host "[ ERROR ] Missing yt-dlp or ffmpeg!" -ForegroundColor Red
+	$ytdlpFile = (Get-ChildItem -Path "$PSScriptRoot" -File -Filter "yt-dlp.exe")
 
-		$choices = [ChoiceDescription[]]("&Yes (Recommended)", "&No")
+	if (($null -eq $ytdlpFile) -or ($null -eq $ffmpegDir)) {
+
+		Write-Host "[ ERROR ] Missing yt-dlp or ffmpeg!" -ForegroundColor Red
 		$title = "Download them automatically?"
+		$choices = [ChoiceDescription[]]("&Yes (Recommended)", "&No")
 		$result = $host.ui.PromptForChoice($title, $null, $choices, 0)
+
 		switch ($result) {
 			0 {
 				Write-Host "[ INFO ] Downloading required files. Please wait..." -ForegroundColor Cyan
 
 				# Download latest yt-dlp version, if missing 
-				if ($null -eq (Get-ChildItem -Path $scriptDir -File -Filter "yt-dlp.exe")) {
-					Start-BitsTransfer -Source $ytdlpURI -Destination "$scriptDir\yt-dlp.exe" -Priority Foreground
+				if ($null -eq $ytdlpFile) {
+					Start-BitsTransfer -Source $ytdlpURI -Destination "$PSScriptRoot\yt-dlp.exe" -Priority Foreground
+					Start-Sleep 1
 				}
 
 				# Download yt-dlp's ffmpeg binaries
-				if ($null -eq (Get-ChildItem -Path "$scriptDir" -Recurse -File -Filter "ff*.exe")) {
-					Start-BitsTransfer -Source $ffmpegURI -Destination "$scriptDir\ffmpeg.zip" -Priority Foreground
+				if ($null -eq $ffmpegDir) {
+					Start-BitsTransfer -Source $ffmpegURI -Destination "$PSScriptRoot\ffmpeg.zip" -Priority Foreground
 					Start-Sleep 2
 
-					Expand-Archive -Path "$scriptDir\ffmpeg.zip" -DestinationPath "$scriptDir" -Force
-					Get-ChildItem -Path "$scriptDir" -Directory -Filter "ffmpeg-*" | Rename-Item -NewName "ffmpeg" -Force
+					Expand-Archive -Path "$PSScriptRoot\ffmpeg.zip" -DestinationPath "$PSScriptRoot" -Force
+					Get-ChildItem -Path "$PSScriptRoot" -Directory -Filter "ffmpeg-*" | Rename-Item -NewName "ffmpeg" -Force
 
-					Remove-Item -Path "$scriptDir\ffmpeg.zip" -Recurse -Force
+					Remove-Item -Path "$PSScriptRoot\ffmpeg.zip" -Recurse -Force
+					$script:ffmpegDir = ((Get-ChildItem -Path "$PSScriptRoot" -File -Recurse -Filter "ffmpeg.exe").DirectoryName)
 				}
 			}
 			1 {
@@ -112,9 +117,6 @@ function reqCheck {
 			}
 		}
 	}
-
-	# Set ffmpeg path to found exec
-	$script:ffmpegDir = (Get-ChildItem -Path "$scriptDir" -File -Recurse -Filter "ffmpeg.exe").FullName | Split-Path -Parent
 }
 
 
@@ -151,7 +153,7 @@ function selection {
 			selection
 		}
 		4 {
-			Start-Process -FilePath "$scriptDir\yt-dlp.exe" -ArgumentList "-U" -Wait -NoNewWindow
+			Start-Process -FilePath "$PSScriptRoot\yt-dlp.exe" -ArgumentList "-U" -Wait -NoNewWindow
 			Start-Sleep 2
 			Clear-Host
 			selection
